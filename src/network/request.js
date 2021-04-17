@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export function reqeust(config) {
+export function request(config) {
   const instance = axios.create({
     baseURL: "http://152.136.185.210:7878/api/m5",
     timeout: 50000
@@ -23,4 +23,5 @@ export function reqeust(config) {
       console.log(error);
     }
   );
+  return instance(config)
 }
