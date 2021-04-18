@@ -1,23 +1,37 @@
 <template>
   <div id="detail">
     <!-- 顶部导航 -->
-    <detail-nav-bar class="detail_nav_bar" @titleClick="titleClick" />
-    <b-scroll class="content" ref="scroll">
+    <detail-nav-bar
+      class="detail_nav_bar"
+      @titleClick="titleClick"
+      ref="detailNavBarRef"
+    />
+    <b-scroll
+      class="content"
+      ref="scroll"
+      @scroll="contentScroll"
+      :probe-type="3"
+    >
+      <ul>
+        <li v-for="item in $store.state.cartList">{{item}}</li>
+      </ul>
       <!-- 轮播图 -->
-      <detail-swiper :top-swiper-list="topSwiperList" />
+      <detail-swiper :top-swiper-list="topSwiperList"/>
       <!-- 商品信息 -->
-      <detail-base-info :goods-info="GoodsInfo" />
+      <detail-base-info :goods-info="GoodsInfo"/>
       <!-- 商家信息 -->
-      <detail-shop-info :shop="shopInfo" />
+      <detail-shop-info :shop="shopInfo"/>
       <!-- 商品详情展示 -->
-      <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad" />
+      <detail-goods-info :detail-info="detailInfo" @imageLoad="imageLoad"/>
       <!-- 商品参数 -->
-      <detail-param-info ref="params" :param-info="goodsParamInfo" />
+      <detail-param-info ref="params" :param-info="goodsParamInfo"/>
       <!-- 评论信息 -->
-      <detail-comment-info ref="comment" :comment-info="commentInfo" />
+      <detail-comment-info ref="comment" :comment-info="commentInfo"/>
       <!-- 推荐商品展示 -->
-      <goods ref="recommend" :goods="recommendList" />
+      <goods ref="recommend" :goods="recommendList"/>
     </b-scroll>
+    <!-- 底部任务栏 -->
+    <detail-bottom-bar @addToCart="addToCart"/>
   </div>
 </template>
 
@@ -30,6 +44,7 @@ import DetailSwiper from "./components/DetailSwiper";
 import DetailBaseInfo from "./components/DetailBaseInfo";
 import DetailShopInfo from "./components/DetailShopInfo";
 import DetailGoodsInfo from "./components/DetailGoodsInfo";
+import DetailBottomBar from "./components/DetailBottomBar";
 import DetailParamInfo from "./components/DetailGoodsParams";
 import DetailCommentInfo from "./components/DetailCommentInfo";
 
@@ -41,11 +56,12 @@ import {
   GoodsParam
 } from "../../network/detail";
 
-import { itemListenerMixin } from "../../common/mixin";
+import {itemListenerMixin} from "../../common/mixin";
 
 export default {
   name: "Detail",
   components: {
+    DetailBottomBar,
     Goods,
     DetailCommentInfo,
     DetailParamInfo,
@@ -67,7 +83,8 @@ export default {
       goodsParamInfo: {}, // 商品参数信息
       commentInfo: {}, // 评论信息
       recommendList: [], // 推荐商品
-      themeTopY: [] // 主题的Y值
+      themeTopY: [], // 主题的Y值
+      currentIndex: 0
     };
   },
   created() {
@@ -75,13 +92,14 @@ export default {
     this.getDetail();
     this.getRecommendList();
   },
-  mounted() {},
+  mounted() {
+  },
   destroyed() {
     this.$bus.$off("itemImageLoad", this.itemImageListener);
   },
   methods: {
     async getDetail() {
-      let { result: res } = await getDetail(this.iid);
+      let {result: res} = await getDetail(this.iid);
       this.topSwiperList = res.itemInfo.topImages;
 
       // 商品信息
@@ -105,7 +123,7 @@ export default {
       }
     },
     async getRecommendList() {
-      let { data: res } = await getRecommend();
+      let {data: res} = await getRecommend();
       this.recommendList = res.list;
     },
     imageLoad() {
@@ -116,11 +134,36 @@ export default {
       this.themeTopY.push(this.$refs.params.$el.offsetTop);
       this.themeTopY.push(this.$refs.comment.$el.offsetTop);
       this.themeTopY.push(this.$refs.recommend.$el.offsetTop);
-
-      console.log(this.themeTopY);
+      this.themeTopY.push(Number.MAX_VALUE);
     },
     titleClick(index) {
       this.$refs.scroll.scrollTo(0, -this.themeTopY[index] - -44, 800);
+    },
+    contentScroll(position) {
+      // 获取Y值
+      const positionY = -position.y - -44;
+
+      let length = this.themeTopY.length;
+      for (let i = 0; i < this.themeTopY.length - 1; i++) {
+        if (
+          this.currentIndex !== i &&
+          positionY > this.themeTopY[i] &&
+          positionY < this.themeTopY[i + 1]
+        ) {
+          this.currentIndex = i;
+          this.$refs.detailNavBarRef.currentIndex = this.currentIndex;
+        }
+      }
+    },
+    addToCart() {
+      const product = {};
+      product.image = this.topSwiperList[0];
+      product.title = this.GoodsInfo.title;
+      product.desc = this.GoodsInfo.desc;
+      product.price = this.GoodsInfo.realPrice;
+      product.iid = this.iid;
+      
+      this.$store.dispatch('addCart', product)
     }
   }
 };
@@ -140,7 +183,7 @@ export default {
   }
 
   .content {
-    height: calc(100vh - 44px);
+    height: calc(100vh - 93px);
   }
 }
 </style>
