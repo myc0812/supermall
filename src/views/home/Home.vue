@@ -22,11 +22,11 @@
       @pullingUp="loadMore"
     >
       <!-- 轮播图 -->
-      <swiper :swiper-list="swiperList" @swiperImgLoad="swiperImgLoad"/>
+      <swiper :swiper-list="swiperList" @swiperImgLoad="swiperImgLoad" />
       <!-- 推荐模块 -->
-      <recommend :recommend-list="recommendList"/>
+      <recommend :recommend-list="recommendList" />
       <!-- 每周推荐 -->
-      <week-popular/>
+      <week-popular />
       <!-- tabControl -->
       <tab-control
         ref="tabControl1"
@@ -34,10 +34,10 @@
         @tabClick="tabClick"
       />
       <!-- 商品列表 -->
-      <goods :goods="showGoods"/>
+      <goods :goods="showGoods" />
     </b-scroll>
     <!-- 返回顶部按钮 -->
-    <back-top v-show="isShowBackTop" @click.native="backTop"/>
+    <back-top v-show="isShowBackTop" @click.native="backTop" />
   </div>
 </template>
 
@@ -55,7 +55,7 @@ import Recommend from "./components/Recommend.vue";
 import WeekPopular from "./components/WeekPopular.vue";
 
 // 网络请求
-import {getHomeMultiData, getHomeGoods} from "@/network/home";
+import { getHomeMultiData, getHomeGoods } from "@/network/home";
 
 export default {
   name: "Home",
@@ -74,9 +74,9 @@ export default {
       swiperList: [], // 轮播图数据
       recommendList: [], // 推荐数据
       goods: {
-        pop: {page: 0, list: []},
-        new: {page: 0, list: []},
-        sell: {page: 0, list: []}
+        pop: { page: 0, list: [] },
+        new: { page: 0, list: [] },
+        sell: { page: 0, list: [] }
       }, // 商品列表
       type: "pop", // 默认显示商品数据
       isShowBackTop: false, // 返回顶部按钮默认不显示
@@ -95,42 +95,42 @@ export default {
     const refresh = this.debounce(this.$refs.scroll.refresh, 500);
 
     this.$bus.$on("itemImageLoad", () => {
-      refresh()
+      refresh();
     });
   },
   destroyed() {
-    console.log('home')
+    console.log("home");
   },
   activated() {
-    this.$refs.scroll.scrollTo(0, this.saveY, 0)
-    this.$refs.scroll.refresh()
+    this.$refs.scroll.scrollTo(0, this.saveY, 0);
+    this.$refs.scroll.refresh();
   },
   deactivated() {
-    this.saveY = this.$refs.scroll.getScrollY()
+    this.saveY = this.$refs.scroll.getScrollY();
   },
   methods: {
     // 防抖函数
     debounce(func, delay) {
-      let timer = null
+      let timer = null;
 
-      return function (...args) {
-        if (timer) clearTimeout(timer)
+      return function(...args) {
+        if (timer) clearTimeout(timer);
 
         timer = setTimeout(() => {
-          func.apply(this, args)
-        }, delay)
-      }
+          func.apply(this, args);
+        }, delay);
+      };
     },
     // 轮播图和推荐数据的请求
     async getHomeMultiData() {
-      let {data: res} = await getHomeMultiData();
+      let { data: res } = await getHomeMultiData();
       this.swiperList = res.banner.list;
       this.recommendList = res.recommend.list;
     },
     // 商业商品的请求
     async getHomeGoods(type) {
       const page = this.goods[type].page + 1;
-      let {data: res} = await getHomeGoods(type, page);
+      let { data: res } = await getHomeGoods(type, page);
       this.goods[type].list.push(...res.list);
       this.goods[type].page += 1;
 
@@ -148,8 +148,8 @@ export default {
         case 2:
           this.type = "sell";
       }
-      this.$refs.tabControl.currentIndex = index
-      this.$refs.tabControl1.currentIndex = index
+      this.$refs.tabControl.currentIndex = index;
+      this.$refs.tabControl1.currentIndex = index;
     },
     // 点击返回顶部
     backTop() {
@@ -160,7 +160,7 @@ export default {
       // 判断backTop是否显示
       this.isShowBackTop = Math.abs(position.y) > 1000;
       // 决定TabControl是否吸顶
-      this.isTabFixed = Math.abs(position.y) > this.tabOffsetTop
+      this.isTabFixed = Math.abs(position.y) > this.tabOffsetTop;
     },
     // 上拉加载更多
     loadMore() {
@@ -168,7 +168,7 @@ export default {
     },
     // 轮播图加载完成
     swiperImgLoad() {
-      this.tabOffsetTop = this.$refs.tabControl1.$el.offsetTop
+      this.tabOffsetTop = this.$refs.tabControl1.$el.offsetTop;
     }
   },
   computed: {
