@@ -54,6 +54,7 @@ import {
 } from "../../network/detail";
 
 import { itemListenerMixin } from "../../common/mixin";
+import { mapActions } from "vuex";
 
 export default {
   name: "Detail",
@@ -94,6 +95,9 @@ export default {
     this.$bus.$off("itemImageLoad", this.itemImageListener);
   },
   methods: {
+    ...mapActions({
+      add: "addCart"
+    }),
     async getDetail() {
       let { result: res } = await getDetail(this.iid);
       this.topSwiperList = res.itemInfo.topImages;
@@ -159,7 +163,9 @@ export default {
       product.price = this.GoodsInfo.realPrice;
       product.iid = this.iid;
 
-      this.$store.dispatch("addCart", product);
+      this.add(product).then(res => {
+        this.$show.show(res, 1500);
+      });
     }
   }
 };

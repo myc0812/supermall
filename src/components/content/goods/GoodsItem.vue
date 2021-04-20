@@ -1,7 +1,7 @@
 <template>
   <div class="goods_item" @click="itemClick">
     <div class="goods_item_img">
-      <img :src="showImage" alt="" @load="imageLoad">
+      <img v-lazy="showImage" alt="" @load="imageLoad" />
     </div>
     <div class="goods_item_info">
       <p class="goods_item_info_title">{{ goodsItem.title }}</p>
@@ -18,29 +18,29 @@ export default {
     goodsItem: {
       type: Object,
       default() {
-        return {}
+        return {};
       }
     }
   },
   methods: {
     imageLoad() {
-      this.$bus.$emit('itemImageLoad')
+      this.$bus.$emit("itemImageLoad");
     },
     itemClick() {
       this.$router.push({
-        path: '/detail',
+        path: "/detail",
         query: {
           iid: this.goodsItem.iid
         }
-      })
+      });
     }
   },
   computed: {
     showImage() {
       return this.goodsItem.image || this.goodsItem.show.img;
     }
-  },
-}
+  }
+};
 </script>
 
 <style lang="less" scoped>
@@ -79,7 +79,7 @@ export default {
       position: relative;
 
       &::before {
-        content: '';
+        content: "";
         position: absolute;
         left: -15px;
         top: -1px;
